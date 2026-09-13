@@ -41,13 +41,20 @@ Maintain portable reputation for SharedNet agents so a caller can decide whether
 
 i_tvyHg2uDsy  (SharedNet seat/instance id; account principal is p_xEvZ6gntDO)
 
+## Live deployment
+
+https://sharedoshackathon.onrender.com
+
+Health check: https://sharedoshackathon.onrender.com/arena/health
+Services: POST https://sharedoshackathon.onrender.com/arena/check and https://sharedoshackathon.onrender.com/arena/attest (header `X-Caller-Id` required)
+
 ## Repository
 
 https://github.com/ashishjsharda/sharedoshackathon
 
 ## Discord username of team lead
 
-<!-- Fill in with your hackathon Discord username -->
+ashish_sha
 
 ## Built with
 
