@@ -1,280 +1,110 @@
-# 🔐 TrustMesh
+# TrustMesh
 
-> **A reputation layer for AI agents built on A2A protocol**
+**Should I pay this agent?**
 
-[![Status](https://img.shields.io/badge/status-alpha-yellow)](https://github.com/ashishjsharda/trustmesh)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10+-blue)](https://python.org)
+TrustMesh is a reputation service for agents on [SharedOS](https://shared-os-hackathon.devpost.com/). Before a caller spends Arena credits on a stranger, it asks TrustMesh whether that stranger has actually delivered before. After a purchase, the caller can attest to the outcome — and if two callers disagree about the same delivery, TrustMesh escalates instead of letting either one silently overwrite the other's history.
 
-**The Problem:** Google's A2A protocol enables agents to communicate, but there's no standard way to evaluate trustworthiness. When Agent A hires Agent B, how does A know B won't fail, leak data, or vanish?
+The scoring engine (a time-weighted Bayesian model) already existed in this repo. What's new for SharedOS is the grant map, the purpose string, the two product agents, and the two Arena-callable services described below.
 
-**The Solution:** TrustMesh provides a Bayesian reputation system that tracks agent behavior across interactions, enabling trust-aware agent ecosystems.
+## Purpose string
 
----
+```
+Maintain portable reputation for SharedNet agents so a caller can decide whether to buy a service, without letting any agent rewrite another agent's history.
+```
 
-## 🎯 Why This Matters
+Purpose id used in every grant and turn: `trustmesh.arena`
 
-The Agent2Agent protocol solved communication. TrustMesh solves reputation.
+## Product agents
 
-- ✅ **Portable trust scores** - Work across any A2A-compatible platform
-- ✅ **Bayesian scoring** - Smart priors handle cold-start for new agents
-- ✅ **Time-weighted** - Recent behavior matters more
-- ✅ **Open & transparent** - No black-box algorithms
-- ✅ **Simple integration** - 3 lines of code
+| Address | Kind | Job |
+|---|---|---|
+| `trustmesh.scorer` | agent | Reads attestations, writes the derived `/mesh/public/{id}/score.json` |
+| `trustmesh.attestor` | agent | Accepts an attestation under the caller's own prefix, escalates conflicts |
 
+Owner / service address: `{ "kind": "service", "serviceId": "trustmesh" }`
 
-![Screenshot 2025-10-09 225726](https://github.com/user-attachments/assets/6e723ba4-8590-40ff-a04f-a3434cb0b833)
+## Services
 
----
+### `trust.check` — 8 Arena credits
 
-## 🚀 Quick Start
+Call this *before* spending credits on someone.
 
-### Install & Run
+- **Input:** `{ "agent_id": "<SharedNet node or product agent>", "task_type": "optional" }`
+- **Output:** `{ "score", "confidence", "n", "recommend": "buy|caution|skip", "why" }`
+- **Call:** `POST /trust.check` on the SharedOS host, or `POST /arena/check` on the TrustMesh API. Header `X-Caller-Id: <your node>`.
+- **SLA:** seconds, well under the 5-minute cap.
+
+### `trust.attest` — 12 Arena credits
+
+Call this *after* a purchase.
+
+- **Input:** `{ "seller_id", "service", "outcome": "success|failure|disputed", "evidence?", "call_id?" }`
+- **Output:** `{ "status": "recorded|escalated", "attestation_id?", "seller_score?" }`
+- **Call:** `POST /trust.attest` or `POST /arena/attest` with `X-Caller-Id`.
+- **Rule:** a caller may only write `/mesh/attestations/{their_id}/**`. Self-dealing is rejected. Conflicting outcomes on the same `call_id` escalate — the score is never overwritten.
+
+## Grant map
+
+Deny by default.
+
+| Who | Path | Actions |
+|---|---|---|
+| any calling agent | `/mesh/public/**` | read, search |
+| calling agent | `/mesh/attestations/{caller}/**` | create, read |
+| `trustmesh.scorer` | `/mesh/public/**` | read, create, replace |
+| `trustmesh.attestor` | `/mesh/attestations/**`, `/mesh/escalations/**` | read, create |
+
+Nobody can replace another agent's public score. Nobody can attest a call they weren't in.
+
+## Escalation
+
+If two attestations share `call_id + seller + service` and disagree on `outcome`, the attestor writes `/mesh/escalations/{id}.json` and returns `"status": "escalated"`. That's an escalate outcome, not a silent deny — the `mesh/` folder in this repo has a real example of each of the three outcomes (buy, deny, escalate) from an actual local run.
+
+## Run locally
+
+The Arena services (`arena_server.py`, `kernel.py`, `core.py`, `scripts/`) use only the Python standard library — no `pip install` required.
 
 ```bash
-# Clone the repo
-git clone https://github.com/ashishjsharda/trustmesh.git
-cd trustmesh
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start the server
-python main.py
+python scripts/seed.py       # seeds a small SharedNet neighborhood so scores aren't all 0.5
+python arena_server.py       # serves trust.check / trust.attest on :8000
 ```
 
-Server runs at `http://localhost:8000`  
-API docs at `http://localhost:8000/docs`
+In another shell:
 
-### Register Your Agent
-
-```python
-import requests
-
-# Register your agent
-response = requests.post(
-    "http://localhost:8000/agents/register",
-    json={
-        "name": "MyAgent",
-        "platform": "anthropic",
-        "description": "Data processing agent"
-    }
-)
-
-agent_data = response.json()
-api_key = agent_data["api_key"]  # Save this!
-agent_id = agent_data["agent_id"]
+```bash
+python scripts/demo_arena.py
 ```
 
-### Check Another Agent's Trust Score
+You should see three outcomes: a buy recommendation, a denied score overwrite, and an escalated conflicting attestation.
 
-```python
-# Before interacting with another agent
-peer_id = "agent_abc123"
-response = requests.get(f"http://localhost:8000/agents/{peer_id}/trust-score")
-trust = response.json()
+Optional SharedOS host (proxies the two services with the purpose string and grant table attached):
 
-if trust["overall_score"] > 0.7:
-    print(f"✅ {trust['agent_name']} is trustworthy ({trust['overall_score']})")
-    # Proceed with interaction
-else:
-    print(f"⚠️  {trust['agent_name']} has low trust ({trust['overall_score']})")
+```bash
+cd host
+npm install
+npm start
 ```
 
-### Log An Interaction
+The original reputation API (`main.py` — agent registration, interaction logging, leaderboard) is the pre-existing engine this build wraps. It's included for reference and isn't required to run the Arena demo above; it also binds port 8000, so don't run it at the same time as `arena_server.py`. To run it on its own: `pip install -r requirements.txt && python main.py`.
 
-```python
-# After working with another agent
-requests.post(
-    "http://localhost:8000/interactions/log",
-    headers={"X-API-Key": api_key},
-    json={
-        "responder_id": peer_id,
-        "task_type": "data_analysis",
-        "outcome": "success"  # or "failure", "disputed"
-    }
-)
-```
-
----
-
-## 📊 How Trust Scores Work
-
-TrustMesh uses a **Beta-Binomial Bayesian model**:
-
-1. **Prior**: New agents start at 0.5 (neutral)
-2. **Updates**: Each interaction adjusts the score
-3. **Time decay**: Recent behavior weighted higher
-4. **Confidence**: Increases with more interactions
-
-```python
-trust_score = α / (α + β)
-
-where:
-  α = prior_successes + weighted_successes
-  β = prior_failures + weighted_failures
-```
-
-**Example trajectory:**
-- New agent: `0.5` (neutral, low confidence)
-- After 5 successes: `0.83` (high trust, medium confidence)
-- After 50 interactions (90% success): `0.89` (high trust, high confidence)
-
----
-
-## 🏗️ Architecture
+## Repository layout
 
 ```
-┌─────────────────────────────────────┐
-│        Agent Ecosystem              │
-│  (Google, Anthropic, Microsoft)     │
-└──────────────┬──────────────────────┘
-               │
-               │ A2A Protocol
-               │
-┌──────────────▼──────────────────────┐
-│         TrustMesh API               │
-│  • Trust Score Engine               │
-│  • Interaction Logging              │
-│  • Reputation Database              │
-└──────────────┬──────────────────────┘
-               │
-               │
-┌──────────────▼──────────────────────┐
-│      Developer Tools                │
-│  • Python SDK                       │
-│  • Web Dashboard (coming soon)      │
-│  • CLI (coming soon)                │
-└─────────────────────────────────────┘
+kernel.py        deny-by-default grant authorizer + append-only audit log
+core.py          Bayesian scoring + SQLite helpers (no web framework)
+arena.py         trust.check / trust.attest logic
+arena_server.py  stdlib HTTP server exposing the Arena services on :8000
+host/            SharedOS Cloud-facing loop (Node) that carries the purpose string
+scripts/         seed.py (sample data) and demo_arena.py (exercises all 3 outcomes)
+mesh/            grant-scoped file store: public/, attestations/, escalations/, audit/
+main.py          pre-existing FastAPI reputation API (register, log, leaderboard)
 ```
 
----
+## Built with
 
-## 🛠️ API Endpoints
+Python, FastAPI, SQLite, Bayesian Beta-Binomial scoring, SharedOS grants/purpose/audit, SharedNet-callable HTTP services.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/agents/register` | Register a new agent |
-| `GET` | `/agents/{id}/trust-score` | Get trust score |
-| `POST` | `/interactions/log` | Log an interaction |
-| `GET` | `/leaderboard` | Top agents by trust |
-| `GET` | `/stats` | Platform statistics |
+## More
 
-Full API documentation: http://localhost:8000/docs
-
----
-
-## 🎯 Roadmap
-
-### ✅ v0.1 (Current - Oct 2025)
-- [x] Core trust algorithm
-- [x] REST API
-- [x] SQLite backend
-- [x] Basic documentation
-- [x] Python SDK
-
-### 🚧 v0.2 (Coming Soon)
-- [ ] PyPI package
-- [ ] A2A middleware integration
-- [ ] PostgreSQL support
-- [ ] Web dashboard
-
-### 🔮 v0.3 (Future)
-- [ ] Dispute resolution
-- [ ] Multi-dimensional trust (skill-specific)
-- [ ] Reputation portability (import/export)
-- [ ] Stake-based bonding
-
----
-
-## 🤝 Contributing
-
-TrustMesh is early-stage and actively seeking contributors!
-
-**We need help with:**
-- 🐛 Bug reports and testing
-- 📚 Documentation improvements  
-- 🔧 SDK development (TypeScript, Rust)
-- 🎨 Web dashboard design
-- 🧪 Integration examples
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
----
-
-## 💡 Use Cases
-
-### 1. **Agent Marketplaces**
-Hire trusted agents based on track record:
-```python
-agents = trustmesh.get_leaderboard(skill="data_analysis", min_score=0.8)
-best_agent = agents[0]
-```
-
-### 2. **Multi-Agent Systems**
-Agents autonomously assess peers:
-```python
-if trustmesh.get_score(peer_id) > 0.7:
-    delegate_task(peer_id)
-else:
-    handle_task_internally()
-```
-
-### 3. **Economic Incentives**
-Pay trusted agents more:
-```python
-trust = trustmesh.get_score(agent_id)
-payment = base_rate * (1 + trust.overall_score)
-```
-
----
-
-## 🔒 Security
-
-- **API Keys**: Required for all interactions
-- **Rate Limiting**: 100 requests/hour per agent
-- **Input Validation**: All data sanitized
-- **Audit Trail**: Immutable interaction logs
-
-**Note:** v0.1 uses SQLite. For production, use PostgreSQL with proper auth.
-
----
-
-## 📖 Documentation
-
-- **API Reference**: Run the server and visit `/docs` for interactive API documentation
-- **Examples**: Check the code examples in this README
-- **Algorithm**: Trust scoring uses Beta-Binomial Bayesian modeling (see code comments in `main.py`)
-
-**Questions?** Open an [issue](https://github.com/ashishjsharda/trustmesh/issues)!
-
----
-
-## 📜 License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-## 🙏 Acknowledgments
-
-Built on the shoulders of giants:
-- **Google's A2A Protocol** - Agent communication standard
-- **Linux Foundation** - Open governance model
-- **Bayesian Statistics** - Trust modeling foundation
-
----
-
-## 🚀 Join the Movement
-
-Agent trust is the missing piece for scalable AI. Let's build it together.
-
-- ⭐ **Star this repo** if you believe in open agent infrastructure
-- 💬 **Join discussions** in Issues
-- 🤝 **Contribute** code, docs, or ideas
-- 🐦 **Share**: "Building trust for AI agents with TrustMesh"
-
----
-
-**Made with ❤️ by [Ashish Sharda](https://github.com/ashishjsharda)**  
-*Building the reputation layer for the agentic web*
+- [`ARENA.md`](ARENA.md) — instructions for the personal agent that pitches, critiques, and spends credits on our behalf.
+- [`DEVPOST.md`](DEVPOST.md) — submission copy for Devpost.

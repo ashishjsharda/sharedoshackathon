@@ -1,6 +1,4 @@
-# Devpost paste
-
-Copy these fields. Replace the three ALL_CAPS placeholders.
+# Devpost submission
 
 ## Project name
 
@@ -18,16 +16,16 @@ Existing scoring lives in this repo. The SharedOS integration is the grant map, 
 
 ## Service listings
 
-**trust.check — 8 Arena credits.**  
-What it does: returns a Bayesian trust score, confidence, sample size, and a buy/caution/skip recommendation for a SharedNet node or product agent.  
-Input: `{ "agent_id": "string", "task_type": "optional string" }`  
-Output: `{ "score": 0.0-1.0, "confidence": 0.0-1.0, "n": int, "recommend": "buy|caution|skip", "why": "string" }`  
+**trust.check — 8 Arena credits.**
+What it does: returns a Bayesian trust score, confidence, sample size, and a buy/caution/skip recommendation for a SharedNet node or product agent.
+Input: `{ "agent_id": "string", "task_type": "optional string" }`
+Output: `{ "score": 0.0-1.0, "confidence": 0.0-1.0, "n": int, "recommend": "buy|caution|skip", "why": "string" }`
 How an agent calls it: POST `/trust.check` on the TrustMesh SharedOS host (or `/arena/check` on the API) with header `X-Caller-Id` set to the calling node's id. Completes in seconds.
 
-**trust.attest — 12 Arena credits.**  
-What it does: records one delivery outcome from a caller who was in the interaction, updates the seller's public score, or escalates if another rater already logged a conflicting outcome for the same call.  
-Input: `{ "seller_id": "string", "service": "string", "outcome": "success|failure|disputed", "evidence": "optional string", "call_id": "optional string" }`  
-Output: `{ "status": "recorded|escalated", "attestation_id": "string?", "seller_score": "number?", "reason": "string?" }`  
+**trust.attest — 12 Arena credits.**
+What it does: records one delivery outcome from a caller who was in the interaction, updates the seller's public score, or escalates if another rater already logged a conflicting outcome for the same call.
+Input: `{ "seller_id": "string", "service": "string", "outcome": "success|failure|disputed", "evidence": "optional string", "call_id": "optional string" }`
+Output: `{ "status": "recorded|escalated", "attestation_id": "string?", "seller_score": "number?", "reason": "string?" }`
 How an agent calls it: POST `/trust.attest` (or `/arena/attest`) with `X-Caller-Id`. A caller cannot attest their own product and cannot write another caller's attestation path.
 
 ## SharedOS purpose string
@@ -41,15 +39,15 @@ Maintain portable reputation for SharedNet agents so a caller can decide whether
 
 ## Personal agent SharedNet node ID
 
-YOUR_SHAREDNET_NODE_ID
+<!-- Fill in after registering your personal agent on SharedNet -->
 
 ## Repository
 
-https://github.com/ashishjsharda/trustmesh
+https://github.com/ashishjsharda/sharedoshackathon
 
 ## Discord username of team lead
 
-YOUR_DISCORD_USERNAME
+<!-- Fill in with your hackathon Discord username -->
 
 ## Built with
 

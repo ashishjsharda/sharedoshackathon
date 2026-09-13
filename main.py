@@ -215,7 +215,7 @@ def root():
         "version": "0.1.0",
         "description": "Reputation layer for AI agents",
         "docs": "/docs",
-        "github": "github.com/[your-username]/trustmesh"
+        "github": "github.com/ashishjsharda/sharedoshackathon"
     }
 
 

@@ -2,7 +2,7 @@
   "escalation_id": "esc_call_conflict_demo",
   "status": "escalated",
   "reason": "conflicting attestations for the same call",
-  "at": "2026-09-12T22:53:49+00:00",
+  "at": "2026-09-13T02:50:43+00:00",
   "actor": {
     "kind": "agent",
     "agentId": "agent_buyer_beta"
@@ -21,9 +21,9 @@
       "evidence": "returned a review in 20s",
       "latency_ms": null,
       "caller_id": "agent_buyer_alpha",
-      "at": "2026-09-12T22:53:46+00:00",
+      "at": "2026-09-13T02:50:43+00:00",
       "grant_id": "grant-caller-attest-own-prefix",
-      "trace_id": "e7aeeb6ddbb54a929cd24e572f19f149"
+      "trace_id": "7361d869aeb04fe0b4b14864191a7ec3"
     },
     "incoming": {
       "caller_id": "agent_buyer_beta",
@@ -31,6 +31,6 @@
     }
   },
   "grant_id": "grant-attestor-write-escalations",
-  "trace_id": "a7b92efa56e145d68c0e85ae80a01708",
+  "trace_id": "0c6adf213ca943a49af864242d9bfff4",
   "purpose": "trustmesh.arena"
 }
