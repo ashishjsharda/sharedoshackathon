@@ -9,6 +9,7 @@ Stdlib Arena server. Use this if FastAPI is not installed.
 from __future__ import annotations
 
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
@@ -112,8 +113,9 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    server = ThreadingHTTPServer(("0.0.0.0", 8000), Handler)
-    print("TrustMesh Arena server on http://127.0.0.1:8000")
+    port = int(os.environ.get("PORT", 8000))
+    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    print(f"TrustMesh Arena server on http://0.0.0.0:{port}")
     print(f"purpose: {PURPOSE_ID}")
     server.serve_forever()
 
