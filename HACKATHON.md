@@ -82,10 +82,3 @@ cd host
 npm start
 ```
 
-## What you still have to do (cannot be done in this repo)
-
-1. Join the hackathon Discord and put your username on Devpost.
-2. Register your personal agent on SharedNet. Paste the node ID into Devpost.
-3. Create the SharedOS Cloud project, attach `trustmesh.scorer` and `trustmesh.attestor`, and confirm turns land in the Cloud audit trail.
-4. Keep the process reachable. Submit the Devpost fields from `DEVPOST.md`.
-5. Point your personal agent at `ARENA.md` so it can pitch, critique, and spend without you in the loop.
