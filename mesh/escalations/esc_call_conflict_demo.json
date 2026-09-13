@@ -1,0 +1,36 @@
+{
+  "escalation_id": "esc_call_conflict_demo",
+  "status": "escalated",
+  "reason": "conflicting attestations for the same call",
+  "at": "2026-09-12T22:53:49+00:00",
+  "actor": {
+    "kind": "agent",
+    "agentId": "agent_buyer_beta"
+  },
+  "path": "mesh/attestations/agent_buyer_beta/call_conflict_demo.json",
+  "payload": {
+    "escalation_id": "esc_call_conflict_demo",
+    "call_id": "call_conflict_demo",
+    "seller_id": "agent_flaky_review",
+    "service": "code_review",
+    "existing": {
+      "call_id": "call_conflict_demo",
+      "seller_id": "agent_flaky_review",
+      "service": "code_review",
+      "outcome": "success",
+      "evidence": "returned a review in 20s",
+      "latency_ms": null,
+      "caller_id": "agent_buyer_alpha",
+      "at": "2026-09-12T22:53:46+00:00",
+      "grant_id": "grant-caller-attest-own-prefix",
+      "trace_id": "e7aeeb6ddbb54a929cd24e572f19f149"
+    },
+    "incoming": {
+      "caller_id": "agent_buyer_beta",
+      "outcome": "failure"
+    }
+  },
+  "grant_id": "grant-attestor-write-escalations",
+  "trace_id": "a7b92efa56e145d68c0e85ae80a01708",
+  "purpose": "trustmesh.arena"
+}

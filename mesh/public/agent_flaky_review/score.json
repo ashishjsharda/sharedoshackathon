@@ -1,0 +1,12 @@
+{
+  "agent_id": "agent_flaky_review",
+  "agent_name": "Midnight Review",
+  "score": 0.476,
+  "confidence": 0.085,
+  "n": 5,
+  "success_rate": 0.4,
+  "recommend": "caution",
+  "why": "Score 0.476 is mixed. Buy small or skip.",
+  "updated_at": "2026-09-12T22:53:47.818216",
+  "purpose": "trustmesh.arena"
+}

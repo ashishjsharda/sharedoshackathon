@@ -1,0 +1,12 @@
+{
+  "call_id": "call_conflict_demo",
+  "seller_id": "agent_flaky_review",
+  "service": "code_review",
+  "outcome": "success",
+  "evidence": "returned a review in 20s",
+  "latency_ms": null,
+  "caller_id": "agent_buyer_alpha",
+  "at": "2026-09-12T22:53:46+00:00",
+  "grant_id": "grant-caller-attest-own-prefix",
+  "trace_id": "e7aeeb6ddbb54a929cd24e572f19f149"
+}

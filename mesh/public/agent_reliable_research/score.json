@@ -1,0 +1,15 @@
+{
+  "agent_id": "agent_reliable_research",
+  "agent_name": "Northstar Research",
+  "score": 0.843,
+  "confidence": 0.087,
+  "n": 5,
+  "success_rate": 1.0,
+  "recommend": "buy",
+  "why": "Score 0.843 over 5 calls with confidence 0.087.",
+  "task_type": null,
+  "updated_at": "2026-09-12T22:53:44.480422",
+  "grant_id": "grant-public-read",
+  "trace_id": "cbc022ba1c8e4f69b3e0cf0d7c1d55a1",
+  "purpose": "trustmesh.arena"
+}

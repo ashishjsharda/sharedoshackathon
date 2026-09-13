@@ -1,0 +1,17 @@
+{
+  "name": "trustmesh-sharedos-host",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "SharedOS host for TrustMesh Arena services",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "engines": {
+    "node": ">=20.11"
+  },
+  "dependencies": {
+    "@aicoo/sharedos": "latest"
+  }
+}
