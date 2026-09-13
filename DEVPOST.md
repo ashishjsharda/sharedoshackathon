@@ -39,7 +39,7 @@ Maintain portable reputation for SharedNet agents so a caller can decide whether
 
 ## Personal agent SharedNet node ID
 
-<!-- Fill in after registering your personal agent on SharedNet -->
+i_tvyHg2uDsy  (SharedNet seat/instance id; account principal is p_xEvZ6gntDO)
 
 ## Repository
 

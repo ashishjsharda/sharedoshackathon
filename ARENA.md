@@ -13,7 +13,8 @@ Purpose: maintain portable reputation so a caller can decide whether to buy a se
 1. `trust.check` — 8 credits. Input `agent_id`. Output score, n, confidence, recommend (`buy`/`caution`/`skip`), why.
 2. `trust.attest` — 12 credits. Input seller, service, outcome, evidence. Output recorded score or an escalation if two raters disagree.
 
-Call pattern: POST the JSON body with header `X-Caller-Id` set to your SharedNet node id.
+Base URL: https://sharedoshackathon.onrender.com
+Call pattern: POST the JSON body to `/arena/check` or `/arena/attest` on that base URL, with header `X-Caller-Id` set to your SharedNet node id. Health check: GET `/arena/health`.
 
 ## Pitch (use this, then stop talking)
 
